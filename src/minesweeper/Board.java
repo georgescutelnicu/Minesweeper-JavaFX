@@ -8,30 +8,36 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.*;
 
+/**
+ * Represents the game board for Minesweeper.
+ */
 public class Board {
-    private int size;
-    private int mines;
-    private int gameIsOn;
-    private List<List<Cell>> buttons;
-    private HashMap<String, Image> images;
+    private final int size;   // Size of the board
+    private final int mines;  // Number of mines on the board
+    private int gameIsOn;   // Current game state
+    private final List<List<Cell>> buttons;   // Grid of cells representing the board
+    private final HashMap<String, Image> images;  // Images for different cell states
 
-    private Label minesLabel;
-    private Label timerLabel;
-    private int timerCount;
+    private final Label minesLabel;   // Label to display remaining mines count
+    private final Label timerLabel;   // Label to display elapsed time
+    private int timerCount; // Counter for elapsed time
+    private final Button btnImg;  // Button to restart the game
 
-    private Button btnImg;
+    private int[] safeTile; // Coordinates of the safe tile
 
-    private int[] safeTile;
-
+    /**
+     * Constructs a Minesweeper board with the specified size and number of mines.
+     *
+     * @param size  The size of the board.
+     * @param mines The number of mines on the board.
+     */
     public Board(int size, int mines) {
         this.size = size;
         this.mines = mines;
@@ -49,6 +55,11 @@ public class Board {
         this.safeTile = new int[2];
     }
 
+    /**
+     * Creates the graphical representation of the game board.
+     *
+     * @return The BorderPane containing the game board.
+     */
     public BorderPane create_board() {
         updateTimer();
 
@@ -66,20 +77,20 @@ public class Board {
                 Cell cell = new Cell(this, row, col);
                 cellRow.add(cell);
 
+                // Set cell button size and graphics
                 cell.getBtn().setMaxSize(images.get("tile").getWidth(), images.get("tile").getHeight());
                 cell.getBtn().setMinSize(images.get("tile").getWidth(), images.get("tile").getHeight());
-
-
                 if (safeTile[0] == row && safeTile[1] == col) {
                     cell.getBtn().setGraphic(new ImageView(images.get("safeTile")));
                 } else {
                     cell.getBtn().setGraphic(new ImageView(images.get("tile")));
                 }
 
-                cell.getBtn().setOnMouseClicked((e) -> {
-                    if (((MouseEvent) e).getButton() == MouseButton.PRIMARY) {
+                // Handle mouse clicks on cell buttons
+                cell.getBtn().setOnMouseClicked(e -> {
+                    if (e.getButton() == MouseButton.PRIMARY) {
                         cell.revealCell();
-                    } else if (((MouseEvent) e).getButton() == MouseButton.SECONDARY) {
+                    } else if (e.getButton() == MouseButton.SECONDARY) {
                         cell.flag();
                     }
                 });
@@ -88,6 +99,7 @@ public class Board {
             this.buttons.add(cellRow);
         }
 
+        // Create header with mines label, timer label and restart button
         BorderPane header = new BorderPane();
         HBox minesBox = new HBox();
         HBox timerBox = new HBox();
@@ -128,16 +140,21 @@ public class Board {
         return layout;
     }
 
+    /**
+     * Randomly generates mines on the game board and update neighbor mine counts.
+     */
     public void generateMines() {
         List<int[]> minesGenerated = new ArrayList<>();
         Random random = new Random();
 
+        // Generate mines until the specified number is reached
         while (minesGenerated.size() < this.mines) {
             int[] mine = {random.nextInt(size), random.nextInt(size)};
             int[] rowRange = {this.safeTile[0] - 1, this.safeTile[0] + 2};
             int[] colRange = {this.safeTile[1] - 1, this.safeTile[1] + 2};
             boolean adjacentMine = false;
 
+            // Check if the mine is adjacent to the safe tile
             for (int i = rowRange[0]; i < rowRange[1]; i++) {
                 for (int j = colRange[0]; j < colRange[1]; j++) {
                     if (0 <= i && i < this.size && 0 <= j && j < this.size) {
@@ -152,6 +169,7 @@ public class Board {
                 }
             }
 
+            // Check if the mine is already generated
             boolean containsMine = false;
             for (int[] existingMine : minesGenerated) {
                 if (Arrays.equals(existingMine, mine)) {
@@ -160,16 +178,19 @@ public class Board {
                 }
             }
 
+            // Add the mine if it meets the conditions
             if (!adjacentMine && !containsMine) {
                 minesGenerated.add(mine);
             }
         }
 
+        // Place mines on the board and update neighboring cell counts
         for (int[] mine : minesGenerated) {
             int mineRow = mine[0];
             int mineCol = mine[1];
             this.buttons.get(mineRow).get(mineCol).setHasMine(true);
 
+            // Update neighboring cell counts
             for (int i = mineRow - 1; i <= mineRow + 1; i++) {
                 for (int j = mineCol - 1; j <= mineCol + 1; j++) {
                     if (0 <= i && i < this.size && 0 <= j && j < this.size) {
@@ -180,6 +201,12 @@ public class Board {
         }
     }
 
+    /**
+     * Recursively reveal neighboring cells when a cell with no neighboring mines is revealed.
+     *
+     * @param row The row index of the cell.
+     * @param col The column index of the cell.
+     */
     public void revealNeighbors(int row, int col) {
         int[] dx = {-1, 0, 1};
         int[] dy = {-1, 0, 1};
@@ -201,6 +228,9 @@ public class Board {
         }
     }
 
+    /**
+     * Checks if the player has lost the game.
+     */
     public void checkLoss() {
         for (List<Cell> row : this.buttons) {
             for (Cell cell : row) {
@@ -212,6 +242,9 @@ public class Board {
         }
     }
 
+    /**
+     * Checks if the player has won the game.
+     */
     public void checkWin() {
         int squaresDiscovered = 0;
 
@@ -227,6 +260,9 @@ public class Board {
         }
     }
 
+    /**
+     * Check the current state of the game (ongoing(1), lost(0), or won(2)) and update UI accordingly.
+     */
     public void isGameInProgress() {
         this.checkLoss();
         this.checkWin();
@@ -255,6 +291,9 @@ public class Board {
         }
     }
 
+    /**
+     * Updates the timer label to display elapsed time.
+     */
     public void updateTimer() {
         Timer timer = new Timer();
         TimerTask task = new TimerTask() {
@@ -272,6 +311,9 @@ public class Board {
         timer.scheduleAtFixedRate(task, 0, 1000);
     }
 
+    /**
+     * Restarts the game.
+     */
     public void restartGame() {
         this.gameIsOn = 1;
         this.timerCount = 0;
@@ -279,12 +321,14 @@ public class Board {
         this.timerLabel.setText("000");
         this.minesLabel.setText(" " + this.mines);
 
+        // Reset all cells on the board
         for (List<Cell> row : buttons) {
             for (Cell cell : row) {
                 cell.resetCell();
             }
         }
 
+        // Generate new safe tile and mines
         Random random = new Random();
         this.safeTile = new int[]{random.nextInt(size), random.nextInt(size)};
         this.buttons.get(safeTile[0]).get(safeTile[1]).getBtn().setGraphic(new ImageView(images.get("safeTile")));
@@ -293,15 +337,41 @@ public class Board {
         btnImg.setGraphic(new ImageView(images.get("yellow")));
     }
 
-
+    /**
+     * Gets the current state of the game.
+     *
+     * @return An integer representing the current state of the game.
+     *         0: Game lost, 1: Game in progress, 2: Game won.
+     */
     public int getGameIsOn() {
         return this.gameIsOn;
     }
 
+    /**
+     * Gets the text content of the mines label.
+     *
+     * @return The text content of the mines label.
+     */
     public String getMinesLabel() {
         return this.minesLabel.getText();
     }
 
+    /**
+     * Retrieves the map containing images for various game elements.
+     *
+     * @return A map containing images for different game elements.
+     *         The keys represent the names of the game elements,
+     *         and the values represent the corresponding images.
+     */
+    public Map<String, Image> getImages() {
+        return this.images;
+    }
+
+    /**
+     * Updates the mines label with the given number.
+     *
+     * @param num The number to update the mines label with.
+     */
     public void updateMinesLabel(int num) {
         int currentMinesCount = Integer.parseInt(this.minesLabel.getText().trim());
         currentMinesCount += num;
@@ -312,13 +382,13 @@ public class Board {
         }
     }
 
-    public Map getImages() {
-        return this.images;
-    }
-
+    /**
+     * Loads images for various game elements.
+     */
     @SuppressWarnings("ConstantConditions")
     private void loadImages() {
         try {
+            // Load images for different game elements
             this.images.put("safeTile", new Image(getClass().getResourceAsStream("images/safe.png")));
             this.images.put("bomb", new Image(getClass().getResourceAsStream("images/bomb.png")));
             this.images.put("flag", new Image(getClass().getResourceAsStream("images/flag.png")));
@@ -328,10 +398,13 @@ public class Board {
             this.images.put("red", new Image(getClass().getResourceAsStream("images/red.png")));
             this.images.put("timer", new Image(getClass().getResourceAsStream("images/timer.png")));
 
+            // Load number images
             for (int i = 0; i <= 8; i++) {
-                this.images.put(String.valueOf(i), new Image(getClass().getResourceAsStream("images/" + i + ".png")));
+                this.images.put(String.valueOf(i), new Image(getClass().getResourceAsStream(
+                        "images/" + i + ".png")));
             }
         } catch (NullPointerException e) {
+            // Handle image loading failure
             System.err.println("Failed to load image resources: " + e.getMessage());
         }
     }
