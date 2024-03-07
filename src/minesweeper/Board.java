@@ -71,7 +71,7 @@ public class Board {
 
 
                 if (safeTile[0] == row && safeTile[1] == col) {
-                    cell.getBtn().setGraphic(new ImageView(images.get("safe_tile")));
+                    cell.getBtn().setGraphic(new ImageView(images.get("safeTile")));
                 } else {
                     cell.getBtn().setGraphic(new ImageView(images.get("tile")));
                 }
@@ -287,7 +287,7 @@ public class Board {
 
         Random random = new Random();
         this.safeTile = new int[]{random.nextInt(size), random.nextInt(size)};
-        this.buttons.get(safeTile[0]).get(safeTile[1]).getBtn().setGraphic(new ImageView(images.get("safe_tile")));
+        this.buttons.get(safeTile[0]).get(safeTile[1]).getBtn().setGraphic(new ImageView(images.get("safeTile")));
 
         generateMines();
         btnImg.setGraphic(new ImageView(images.get("yellow")));
@@ -319,7 +319,7 @@ public class Board {
     @SuppressWarnings("ConstantConditions")
     private void loadImages() {
         try {
-            this.images.put("safe_tile", new Image(getClass().getResourceAsStream("images/safe.png")));
+            this.images.put("safeTile", new Image(getClass().getResourceAsStream("images/safe.png")));
             this.images.put("bomb", new Image(getClass().getResourceAsStream("images/bomb.png")));
             this.images.put("flag", new Image(getClass().getResourceAsStream("images/flag.png")));
             this.images.put("tile", new Image(getClass().getResourceAsStream("images/tile.png")));
@@ -327,7 +327,6 @@ public class Board {
             this.images.put("green", new Image(getClass().getResourceAsStream("images/green.png")));
             this.images.put("red", new Image(getClass().getResourceAsStream("images/red.png")));
             this.images.put("timer", new Image(getClass().getResourceAsStream("images/timer.png")));
-            this.images.put("window_icon", new Image(getClass().getResourceAsStream("images/icon.png")));
 
             for (int i = 0; i <= 8; i++) {
                 this.images.put(String.valueOf(i), new Image(getClass().getResourceAsStream("images/" + i + ".png")));

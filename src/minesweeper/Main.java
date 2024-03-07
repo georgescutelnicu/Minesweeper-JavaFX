@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -54,6 +55,8 @@ public class Main extends Application {
             Scene scene = new Scene(board);
             window.setScene(scene);
             window.setTitle("Minesweeper");
+            window.getIcons().clear();
+            window.getIcons().add(new Image(getClass().getResourceAsStream("images/icon.png")));
         });
 
         HBox radioButtons = new HBox(10);
@@ -68,6 +71,7 @@ public class Main extends Application {
         window.setTitle("Difficulty");
         window.setScene(scene);
         window.setResizable(false);
+        window.getIcons().add(new Image(getClass().getResourceAsStream("images/settings.png")));
         window.show();
     }
 
