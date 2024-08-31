@@ -31,3 +31,7 @@
 <img src="extras/N.png" width="200">
 <img src="extras/W.png" width="200">
 <img src="extras/L.png" width="200">
+
+<br>
+
+[Check out the enhanced version made with Python!](https://github.com/georgescutelnicu/PySweeper)
